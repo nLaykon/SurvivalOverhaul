@@ -1,0 +1,4 @@
+name: SurvivalOverhaul
+version: '${project.version}'
+main: org.laykon.survivaloverhaul.SurvivalOverhaul
+api-version: '1.20'
