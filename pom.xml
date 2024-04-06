@@ -37,6 +37,10 @@
             <goals>
               <goal>shade</goal>
             </goals>
+              <configuration>
+                  <finalName>${project.artifactId}-${project.version}</finalName>
+                  <outputDirectory>C:\Users\Laykon\Documents\Code\Minecraft_Servers\1.20.2_Paper_Server\plugins</outputDirectory>
+              </configuration>
           </execution>
         </executions>
       </plugin>

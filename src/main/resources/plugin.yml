@@ -2,3 +2,11 @@ name: SurvivalOverhaul
 version: '${project.version}'
 main: org.laykon.survivaloverhaul.SurvivalOverhaul
 api-version: '1.20'
+
+commands:
+  fly:
+    description: "Enables/Disables Fly"
+  givecustomitem:
+    description: "givecustomitem"
+  giveflightboots:
+    description: "giveflightboots"
