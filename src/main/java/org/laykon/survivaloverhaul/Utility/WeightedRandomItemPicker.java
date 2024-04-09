@@ -1,7 +1,7 @@
 package org.laykon.survivaloverhaul.Utility;
+
 import org.bukkit.inventory.ItemStack;
-import java.util.Random;
-import org.bukkit.inventory.ItemStack;
+
 import java.util.ArrayList;
 import java.util.List;
 

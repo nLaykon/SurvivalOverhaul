@@ -1,9 +1,10 @@
 package org.laykon.survivaloverhaul.Utility;
 
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+
 import java.io.File;
-import org.bukkit.configuration.InvalidConfigurationException;
 import java.io.IOException;
 
 public class ConfigManager {

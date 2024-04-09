@@ -5,8 +5,16 @@ api-version: '1.20'
 
 commands:
   fly:
-    description: "Enables/Disables Fly"
   givecustomitem:
-    description: "givecustomitem"
-  giveflightboots:
-    description: "giveflightboots"
+  dev/givecustomitem/flyboots:
+  dev/givecustomitem/railgun:
+  dev/givecustomitem/snowstaff:
+  dev/givecustomitem/thundersword:
+  dev/givecustomitem/phantomlegguards:
+  dev/givecustomitem/phantomplate:
+  dev/givecustomitem/phantomstriders:
+  dev/givecustomitem/phantomvisor:
+  dev/givecustomitem/aquaticharvesterpickaxe:
+  dev/givecustomitem/coraldiggershovel:
+  dev/givecustomitem/seafarerstillerhoe:
+  dev/givecustomitem/tidebreakeraxe:

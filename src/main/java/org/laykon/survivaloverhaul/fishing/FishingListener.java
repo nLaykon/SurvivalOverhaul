@@ -13,9 +13,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.laykon.survivaloverhaul.SurvivalOverhaul;
 import org.laykon.survivaloverhaul.Utility.ConfigManager;
 import org.laykon.survivaloverhaul.Utility.WeightedRandomItemPicker;
-import org.laykon.survivaloverhaul.Utils;
 import org.laykon.survivaloverhaul.Utility.itemBuilder;
-
+import org.laykon.survivaloverhaul.Utils;
 
 import java.util.ArrayList;
 
