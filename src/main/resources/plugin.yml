@@ -5,16 +5,4 @@ api-version: '1.20'
 
 commands:
   fly:
-  givecustomitem:
-  dev/givecustomitem/flyboots:
-  dev/givecustomitem/railgun:
-  dev/givecustomitem/snowstaff:
-  dev/givecustomitem/thundersword:
-  dev/givecustomitem/phantomlegguards:
-  dev/givecustomitem/phantomplate:
-  dev/givecustomitem/phantomstriders:
-  dev/givecustomitem/phantomvisor:
-  dev/givecustomitem/aquaticharvesterpickaxe:
-  dev/givecustomitem/coraldiggershovel:
-  dev/givecustomitem/seafarerstillerhoe:
-  dev/givecustomitem/tidebreakeraxe:
+  dev/giveolympian:
