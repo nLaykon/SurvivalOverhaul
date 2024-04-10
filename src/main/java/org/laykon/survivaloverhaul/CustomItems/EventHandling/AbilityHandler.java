@@ -14,6 +14,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.server.PluginDisableEvent;
@@ -219,17 +220,6 @@ public class AbilityHandler implements Utils, Listener {
         }
         //Hera
     }
-
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent it) {
-
-    }
-
-
-    @EventHandler
-    public void onPlayerLeave(PlayerQuitEvent it) {
-
-    }
     @EventHandler
     public void onBlockBreak(BlockBreakEvent it){
         Player player = it.getPlayer();
@@ -258,6 +248,10 @@ public class AbilityHandler implements Utils, Listener {
             }
         }
         //Demeter
+
+    }
+    @EventHandler
+    public void onInteract(PlayerInteractEvent it){
 
     }
 
