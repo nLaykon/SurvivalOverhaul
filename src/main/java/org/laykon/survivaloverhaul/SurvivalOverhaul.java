@@ -6,7 +6,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.laykon.survivaloverhaul.CustomItems.Commands.OlymianGiveCommand;
@@ -31,6 +30,7 @@ public final class SurvivalOverhaul extends JavaPlugin implements Utils {
         cfg = new ConfigManager(this);
         cmd("fly", new Fly());
         cmd("dev/giveolympian", new OlymianGiveCommand());
+        cmd("feed", new Feed());
 
         event(new FishingListener());
         event(new ChatFormattingListener());
@@ -47,13 +47,14 @@ public final class SurvivalOverhaul extends JavaPlugin implements Utils {
         @Override
         public void run() {
             for (Player player : Bukkit.getOnlinePlayers()) {
-                if (isSet(player, "hera")) {
+                if (isSet(player, "hera"))
                     player.addPotionEffect(PotionEffectType.REGENERATION.createEffect(110, 0));
 
-                }
-                if (isSet(player, "poseidon")){
+                if (isSet(player, "hermes"))
+                    player.addPotionEffect(PotionEffectType.SPEED.createEffect(110, 0));
+
+                if (isSet(player, "poseidon"))
                     player.setRemainingAir(player.getMaximumAir());
-                }
 
 
             }

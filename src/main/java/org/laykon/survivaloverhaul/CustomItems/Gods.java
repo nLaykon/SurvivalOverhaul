@@ -4,6 +4,8 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.laykon.survivaloverhaul.Utils;
 
+import java.util.ArrayList;
+
 public enum Gods implements Utils {
     ZEUS(Material.DIAMOND_HELMET, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_LEGGINGS, Material.DIAMOND_BOOTS, Material.DIAMOND_AXE, "&#FFC000&lThunderlord's ", "Crown", "Chestplate", "Leggings", "Boots", "&#FFC000&lThunderbolt Hammer", "zeus",
             new String[]{" ", "&f&lSet Bonus:",
@@ -34,8 +36,8 @@ public enum Gods implements Utils {
                     "&#C8C8C8Automatically replants crops when",
                     "&#C8C8C8harvesting and increases crop yield."},
             new String[]{" ", "&f&lAbility:",
-                    "&#C8C8C8Causes plants and crops to grow instantly in a",
-                    "&#C8C8C8large area around the player."}),
+                    "&#C8C8C8Causes plants and crops to instantly be",
+                    "&#C8C8C8harvested in alarge area around the player."}),
 
     ATHENA(Material.DIAMOND_HELMET, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_LEGGINGS, Material.DIAMOND_BOOTS, Material.TRIDENT, "&#B4FBFF&lAegis ", "Helm", "Breastplate", "Legguards", "Boots", "&#B4FBFF&lSpear of Strategy", "athena",
             new String[]{" ", "&f&lSet Bonus:",
@@ -151,5 +153,17 @@ public enum Gods implements Utils {
             return buildCustomItem(item, itemName, key+"item", Item);
         }
         return null;
+    }
+
+    public ArrayList<ItemStack> getSet(OlympianSets set){
+        if (set == null) return null;
+        ArrayList<ItemStack> items = new ArrayList<>();
+        items.add(buildCustomItem(helm, prefix + helmSuffix, key, Armour));
+        items.add(buildCustomItem(chest, prefix + chestSuffix, key, Armour));
+        items.add(buildCustomItem(legs, prefix + legsSuffix, key, Armour));
+        items.add(buildCustomItem(feet, prefix + feetSuffix, key, Armour));
+        items.add(buildCustomItem(item, itemName, key+"item", Item));
+
+        return items;
     }
 }

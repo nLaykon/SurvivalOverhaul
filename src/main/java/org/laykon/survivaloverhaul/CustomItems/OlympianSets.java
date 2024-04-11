@@ -31,4 +31,9 @@ public enum OlympianSets implements Utils{
     public ItemStack getItem(Gods god){
         return god.getItem(this);
     }
+    public ArrayList<ItemStack> getSets(Gods god){
+        return god.getSet(this);
+    }
+
+
 }

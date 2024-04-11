@@ -1,18 +1,16 @@
 package org.laykon.survivaloverhaul;
 
 
-import net.kyori.adventure.util.Index;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Ageable;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.ArrayList;
@@ -317,5 +315,46 @@ public interface Utils {
         World world = location.getWorld();
         Block block = world.getBlockAt(location);
         block.setType(material);
+    }
+    default boolean isInWater(Player player) {
+        Location loc = player.getLocation();
+        Block block = loc.getBlock();
+        return block.getType() == Material.WATER || block.getType() == Material.WATER;
+    }
+    default List<Block> getNearbyBlocks(Location location, int radius) {
+        List<Block> nearbyBlocks = new ArrayList<>();
+        World world = location.getWorld();
+        if (world != null) {
+            int minX = location.getBlockX() - radius;
+            int minY = location.getBlockY() - radius;
+            int minZ = location.getBlockZ() - radius;
+            int maxX = location.getBlockX() + radius;
+            int maxY = location.getBlockY() + radius;
+            int maxZ = location.getBlockZ() + radius;
+            for (int x = minX; x <= maxX; x++) {
+                for (int y = minY; y <= maxY; y++) {
+                    for (int z = minZ; z <= maxZ; z++) {
+                        Block block = world.getBlockAt(x, y, z);
+                        nearbyBlocks.add(block);
+                    }
+                }
+            }
+        }
+        return nearbyBlocks;
+    }
+    default Entity getNearestEntity(Player player) {
+        double lowestDistance = 32;
+        Entity closestEntity = null;
+
+        for (Entity entity : player.getNearbyEntities(10, 10, 10)) {
+            if (entity ==  (Entity) player) continue;
+            double distance = entity.getLocation().distance(player.getLocation());
+            if (distance < lowestDistance) {
+                lowestDistance = distance;
+                closestEntity = entity;
+            }
+        }
+
+        return closestEntity;
     }
 }

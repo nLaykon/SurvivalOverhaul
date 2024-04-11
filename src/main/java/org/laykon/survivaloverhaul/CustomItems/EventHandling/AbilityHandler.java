@@ -1,7 +1,7 @@
 package org.laykon.survivaloverhaul.CustomItems.EventHandling;
 
+import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import org.bukkit.Bukkit;
-import org.bukkit.CropState;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -12,13 +12,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityPotionEffectEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.server.PluginDisableEvent;
-import org.bukkit.event.server.PluginEnableEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Crops;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -27,11 +25,7 @@ import org.bukkit.util.Vector;
 import org.laykon.survivaloverhaul.SurvivalOverhaul;
 import org.laykon.survivaloverhaul.Utils;
 
-import java.awt.image.CropImageFilter;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class AbilityHandler implements Utils, Listener {
 
@@ -201,6 +195,18 @@ public class AbilityHandler implements Utils, Listener {
         }
         //Hera
 
+        //Athena
+        if (damaged instanceof Player) {
+            if (isSet((Player) damaged, "athena")) {
+                it.setCancelled(true);
+                double taken = (it.getDamage() * 0.75);
+                double reflection = (it.getDamage() / 4);
+                ((Player) damaged).damage(taken);
+                ((LivingEntity) damager).damage(reflection, damaged);
+            }
+        }
+        //Athena
+
     }
 
     @EventHandler
@@ -220,41 +226,143 @@ public class AbilityHandler implements Utils, Listener {
         }
         //Hera
     }
+
     @EventHandler
-    public void onBlockBreak(BlockBreakEvent it){
+    public void onBlockBreak(BlockBreakEvent it) {
         Player player = it.getPlayer();
         Block block = it.getBlock();
 
         //Demeter
-        if (isSet(player, "demeter")){
-            if (isCrop(block.getType())){
-                BlockState state = block.getState();
-                Crops crops = (Crops) state.getData();
-                int age = crops.getState().getData();
-                Location loc = block.getLocation();
-                if (age == getMaxAge(block.getType())){
-                    Collection<ItemStack> droppedItems = block.getDrops();
-                    for (ItemStack item : droppedItems){
-                        loc.getWorld().dropItemNaturally(loc, item);
-                        System.out.println(item.getItemMeta().getDisplayName());
+        if (isSet(player, "demeter")) {
+            if (!(player.isSneaking())) {
+                if (isCrop(block.getType())) {
+                    BlockState state = block.getState();
+                    Crops crops = (Crops) state.getData();
+                    int age = crops.getState().getData();
+                    Location loc = block.getLocation();
+                    if (age == getMaxAge(block.getType())) {
+                        Collection<ItemStack> droppedItems = block.getDrops();
+                        for (ItemStack item : droppedItems) {
+                            loc.getWorld().dropItemNaturally(loc, item);
+                        }
+                        block.setType(block.getType());
+                        System.out.println(block.getDrops());
+                        it.setCancelled(true);
+                    } else {
+                        it.setCancelled(true);
                     }
-                    block.setType(block.getType());
-                    System.out.println(block.getDrops());
-                    sendMessage(player, "Get Farmed BITCH");
-                    it.setCancelled(true);
-                }else {
-                 it.setCancelled(true);
                 }
             }
         }
         //Demeter
 
     }
+
     @EventHandler
-    public void onInteract(PlayerInteractEvent it){
+    public void onInteract(PlayerInteractEvent it) {
+        Player player = it.getPlayer();
+        Location loc = it.getInteractionPoint();
+        if (it.getAction().isRightClick()) {
+            //Demeter
+            if (isItem(player, "demeterItem")) {
+                if (demeterHarvest.contains(player.getUniqueId())) return;
+                List<Block> blocks = getNearbyBlocks(loc, 4);
+                if (isSet(player, "demeter")) {
+                    for (Block block : blocks) {
+                        if (isCrop(block.getType())) {
+                            BlockState state = block.getState();
+                            Crops crops = (Crops) state.getData();
+                            int age = crops.getState().getData();
+                            if (age == getMaxAge(block.getType())) {
+                                Collection<ItemStack> droppedItems = block.getDrops();
+                                for (ItemStack item : droppedItems) {
+                                    loc.getWorld().dropItemNaturally(loc, item);
+                                }
+                                block.setType(block.getType());
+                            }
+                        }
+                    }
+                } else {
+                    for (Block block : blocks) {
+                        if (isCrop(block.getType())) {
+                            BlockState state = block.getState();
+                            Crops crops = (Crops) state.getData();
+                            int age = crops.getState().getData();
+                            if (age == getMaxAge(block.getType()))
+                                block.breakNaturally(player.getInventory().getItemInMainHand());
+                        }
+                    }
+                }
+                demeterHarvest.add(player.getUniqueId());
+                Bukkit.getScheduler().runTaskLater(SurvivalOverhaul.getInstance(), () -> demeterHarvest.remove(player.getUniqueId()), 100L);
+            }
+            //Demeter
+
+            //Athena
+            if (isItem(player, "athenaItem")){
+                ItemStack itemInHand = player.getInventory().getItemInMainHand();
+
+                if (itemInHand.getType() == Material.TRIDENT) {
+                    Trident trident = player.launchProjectile(Trident.class);
+                    trident.setPickupStatus(Trident.PickupStatus.DISALLOWED);
+
+                    Entity targetEntity = getNearestEntity(player);
+                    Vector direction = targetEntity.getLocation().subtract(player.getLocation()).toVector();
+                    trident.setVelocity(direction.normalize().multiply(2.0)); //
+                }
+            }
+            //Athena
+        }
 
     }
 
+    private final Set<UUID> doubleJumpers = new HashSet<>();
+    private final Set<UUID> demeterHarvest = new HashSet<>();
+
+    @EventHandler
+    public void onPlayerJump(PlayerJumpEvent it) {
+
+    }
+
+
+    @EventHandler
+    public void onPlayerMove(PlayerMoveEvent event) {
+        Player player = event.getPlayer();
+        Location from = event.getFrom();
+        Location to = event.getTo();
+
+        //Hermes
+        if (isSet(player, "hermes")) {
+            if (from != null && to != null && to.getY() > from.getY()) {
+                if (!player.isOnGround() && !doubleJumpers.contains(player.getUniqueId())) {
+                    if (!isInWater(player)) {
+                        player.setVelocity(player.getLocation().getDirection().multiply(1.5).setY(1));
+                        doubleJumpers.add(player.getUniqueId());
+                    }
+                }
+            }
+            if (to != null && player.isOnGround()) {
+                doubleJumpers.remove(player.getUniqueId());
+            }
+        }
+        //Hermes
+    }
+
+    @EventHandler
+    public void onFallDamage(EntityDamageEvent it) {
+        Player player;
+
+        if (it.getEntity() instanceof Player) {
+            player = (Player) it.getEntity();
+            //Hermes
+            if (isSet(player, "hermes")) {
+                if (it.getCause() == EntityDamageEvent.DamageCause.FALL) it.setCancelled(true);
+            }
+            //Hermes
+        }
+
+
+    }
 
 
 }

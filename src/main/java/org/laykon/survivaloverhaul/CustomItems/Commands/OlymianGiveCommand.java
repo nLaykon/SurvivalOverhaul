@@ -40,12 +40,12 @@ public class OlymianGiveCommand implements CommandExecutor, Utils {
                 target.getInventory().addItem(OlympianSets.ITEM.getItem(Gods.ZEUS));
                 break;
             case "zeus":
-                target.getInventory().addItem(OlympianSets.HELMET.getItem(Gods.ZEUS));
-                target.getInventory().addItem(OlympianSets.CHESTPLATE.getItem(Gods.ZEUS));
-                target.getInventory().addItem(OlympianSets.LEGGINGS.getItem(Gods.ZEUS));
-                target.getInventory().addItem(OlympianSets.BOOTS.getItem(Gods.ZEUS));
-                target.getInventory().addItem(OlympianSets.ITEM.getItem(Gods.ZEUS));
-                System.out.println("Check");
+                for (var os : OlympianSets.values()){
+                    var item = Gods.DEMETER.getItem(os);
+                    if (item != null){
+                        target.getInventory().addItem(item);
+                    }
+                }
                 break;
             case "heraHelmet":
                 target.getInventory().addItem(OlympianSets.HELMET.getItem(Gods.HERA));
@@ -63,11 +63,12 @@ public class OlymianGiveCommand implements CommandExecutor, Utils {
                 target.getInventory().addItem(OlympianSets.ITEM.getItem(Gods.HERA));
                 break;
             case "hera":
-                target.getInventory().addItem(OlympianSets.HELMET.getItem(Gods.HERA));
-                target.getInventory().addItem(OlympianSets.CHESTPLATE.getItem(Gods.HERA));
-                target.getInventory().addItem(OlympianSets.LEGGINGS.getItem(Gods.HERA));
-                target.getInventory().addItem(OlympianSets.BOOTS.getItem(Gods.HERA));
-                target.getInventory().addItem(OlympianSets.ITEM.getItem(Gods.HERA));
+                for (var os : OlympianSets.values()){
+                    var item = Gods.HERA.getItem(os);
+                    if (item != null){
+                        target.getInventory().addItem(item);
+                    }
+                }
                 break;
             case "poseidonHelmet":
                 target.getInventory().addItem(OlympianSets.HELMET.getItem(Gods.POSEIDON));
@@ -85,11 +86,12 @@ public class OlymianGiveCommand implements CommandExecutor, Utils {
                 target.getInventory().addItem(OlympianSets.ITEM.getItem(Gods.POSEIDON));
                 break;
             case "poseidon":
-                target.getInventory().addItem(OlympianSets.HELMET.getItem(Gods.POSEIDON));
-                target.getInventory().addItem(OlympianSets.CHESTPLATE.getItem(Gods.POSEIDON));
-                target.getInventory().addItem(OlympianSets.LEGGINGS.getItem(Gods.POSEIDON));
-                target.getInventory().addItem(OlympianSets.BOOTS.getItem(Gods.POSEIDON));
-                target.getInventory().addItem(OlympianSets.ITEM.getItem(Gods.POSEIDON));
+                for (var os : OlympianSets.values()){
+                    var item = Gods.POSEIDON.getItem(os);
+                    if (item != null){
+                        target.getInventory().addItem(item);
+                    }
+                }
                 break;
             case "demeterHelmet":
                 target.getInventory().addItem(OlympianSets.HELMET.getItem(Gods.DEMETER));
@@ -226,6 +228,12 @@ public class OlymianGiveCommand implements CommandExecutor, Utils {
             case "dionysusItem":
                 target.getInventory().addItem(OlympianSets.ITEM.getItem(Gods.DIONYSUS));
                 break;
+            case "test":
+                for (OlympianSets os : OlympianSets.values()){
+                    target.getInventory().addItem(Gods.DEMETER.getItem(os));
+                }
+
+
             default:
                 System.out.println(args[1] + " Is not a valid item");
                 return true;
