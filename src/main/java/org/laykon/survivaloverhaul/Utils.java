@@ -7,8 +7,11 @@ import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -268,7 +271,7 @@ public interface Utils {
         return b.toString();
     }
 
-    default ItemStack buildCustomItem(final Material material, final String itemName, final String key, final String... loreStrings) {
+    default ItemStack buildCustomItem(final Material material, final String itemName, final String key, final int modelNum, final String... loreStrings) {
         var lore = new ArrayList<>(Arrays.stream(loreStrings).toList());
         lore.add(" ");
         lore.add("&#8000CA&lMYTHICAL");
@@ -279,10 +282,20 @@ public interface Utils {
         var itemStack = new ItemStack(material);
 
         var meta = itemStack.getItemMeta();
+        //Checks if its armor, if it is, adds armor and armor toughness
+        if (isArmor(material)){
+            AttributeModifier armorToughness = new AttributeModifier(UUID.randomUUID(), "random", 4.0, AttributeModifier.Operation.ADD_NUMBER, getArmorSlot(itemStack));
+            meta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, armorToughness);
+            AttributeModifier armor = new AttributeModifier(UUID.randomUUID(), "random", 7.0, AttributeModifier.Operation.ADD_NUMBER, getArmorSlot(itemStack));
+            meta.addAttributeModifier(Attribute.GENERIC_ARMOR, armor);
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
+            meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
+        }
+
         meta.setDisplayName(hexColour(itemName));
         meta.setLore(lore);
         meta.setUnbreakable(true);
-        meta.setCustomModelData(1);
+        meta.setCustomModelData(modelNum);
 
         // This _needs_to be a String type
         var itemKey = new NamespacedKey(SurvivalOverhaul.getInstance(), key);
@@ -414,4 +427,72 @@ public interface Utils {
 
         return itemStack;
     }
+
+    default boolean isArmor (Material material){
+        //Check if the material is an armor type, return true if it is, return false if it isnt
+        String materialName = material.name();
+        // Check if the material name contains "HELMET", "CHESTPLATE", "LEGGINGS", or "BOOTS"
+        return materialName.endsWith("_HELMET") ||
+                materialName.endsWith("_CHESTPLATE") ||
+                materialName.endsWith("_LEGGINGS") ||
+                materialName.endsWith("_BOOTS");
+    }
+
+    default EquipmentSlot getArmorSlot(ItemStack armorItem) {
+        Material itemType = armorItem.getType();
+
+        switch (itemType) {
+            case DIAMOND_HELMET:
+            case IRON_HELMET:
+            case GOLDEN_HELMET:
+            case LEATHER_HELMET:
+            case TURTLE_HELMET:
+            case NETHERITE_HELMET:
+                return EquipmentSlot.HEAD;
+
+            case DIAMOND_CHESTPLATE:
+            case IRON_CHESTPLATE:
+            case GOLDEN_CHESTPLATE:
+            case LEATHER_CHESTPLATE:
+            case NETHERITE_CHESTPLATE:
+                return EquipmentSlot.CHEST;
+
+            case DIAMOND_LEGGINGS:
+            case IRON_LEGGINGS:
+            case GOLDEN_LEGGINGS:
+            case LEATHER_LEGGINGS:
+            case NETHERITE_LEGGINGS:
+                return EquipmentSlot.LEGS;
+
+            case DIAMOND_BOOTS:
+            case IRON_BOOTS:
+            case GOLDEN_BOOTS:
+            case LEATHER_BOOTS:
+            case NETHERITE_BOOTS:
+                return EquipmentSlot.FEET;
+
+            default:
+                return null;
+        }
+    }
+    default boolean isAnimal(EntityType entityType){
+        switch (entityType) {
+            case CHICKEN:
+            case COW:
+            case DONKEY:
+            case FOX:
+            case HORSE:
+            case LLAMA:
+            case MUSHROOM_COW:
+            case MULE:
+            case PIG:
+            case RABBIT:
+            case SHEEP:
+            case TURTLE:
+                return true;
+            default:
+                return false;
+        }
+    }
+
 }

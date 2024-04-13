@@ -4,6 +4,7 @@ import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.enchantments.Enchantment;
@@ -15,11 +16,15 @@ import org.bukkit.event.entity.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.material.Crops;
+import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+import org.laykon.survivaloverhaul.CustomItems.Gods;
+import org.laykon.survivaloverhaul.CustomItems.OlympianItem;
 import org.laykon.survivaloverhaul.SurvivalOverhaul;
 import org.laykon.survivaloverhaul.Utils;
 
@@ -40,6 +45,13 @@ public class AbilityHandler implements Utils, Listener {
 
     Random rng = new Random();
 
+    List<ItemStack> cropDrops = new ArrayList<>(Arrays.asList(
+            Gods.DEMETER.getItem(OlympianItem.HELMET),
+            Gods.DEMETER.getItem(OlympianItem.CHESTPLATE),
+            Gods.DEMETER.getItem(OlympianItem.LEGGINGS),
+            Gods.DEMETER.getItem(OlympianItem.BOOTS),
+            Gods.DEMETER.getItem(OlympianItem.ITEM)
+    ));
 
     @EventHandler
     public void onPlayerShootBow(EntityShootBowEvent event) {
@@ -203,23 +215,24 @@ public class AbilityHandler implements Utils, Listener {
                 ((Player) damaged).damage(taken);
                 try {
                     ((LivingEntity) damager).damage(reflection, damaged);
-                }catch (Exception e){}
+                } catch (Exception e) {
+                }
             }
         }
         //Athena
 
         //Ares
-        if(damager instanceof Player){
+        if (damager instanceof Player) {
             Player player = (Player) damager;
-            if (isItem(player, "aresitem")){
+            if (isItem(player, "aresitem")) {
                 List<Entity> entityList = player.getNearbyEntities(5, 4, 5);
-                for (Entity entity : entityList){
+                for (Entity entity : entityList) {
                     if (entity == player) continue;
-                    if (!(entity instanceof Damageable))continue;
+                    if (!(entity instanceof Damageable)) continue;
                     ((Damageable) entity).damage(it.getDamage());
                 }
-                if (rng.nextInt(10) == 0){
-                    player.damage(it.getDamage()/2);
+                if (rng.nextInt(10) == 0) {
+                    player.damage(it.getDamage() / 2);
                 }
             }
         }
@@ -247,16 +260,30 @@ public class AbilityHandler implements Utils, Listener {
         //Hera
 
         //Dionysus
-        if (isSet(player, "dionysus")){
+        if (isSet(player, "dionysus")) {
             try {
                 if (it.getNewEffect().getType() == null) return;
-                if (it.getNewEffect().getType().equals(PotionEffectType.POISON)); it.setCancelled(true);
+                if (it.getNewEffect().getType().equals(PotionEffectType.POISON)) ;
+                it.setCancelled(true);
             } catch (Exception e) {
-
             }
+
         }
 
+        if (isItem(player, "dionysusitem")) {
+            try {
+                if (it.getNewEffect().getType().equals(PotionEffectType.CONFUSION)) {
+                    player.setHealth(player.getMaxHealth());
+                    it.setCancelled(true);
+                }
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+
+        }
         //Dionysus
+
+
     }
 
     @EventHandler
@@ -274,11 +301,14 @@ public class AbilityHandler implements Utils, Listener {
                     Location loc = block.getLocation();
                     if (age == getMaxAge(block.getType())) {
                         Collection<ItemStack> droppedItems = block.getDrops();
+                        if (rng.nextInt(100) == 0) {
+                            droppedItems.add(cropDrops.get(rng.nextInt(cropDrops.size())));
+                        }
+
                         for (ItemStack item : droppedItems) {
                             loc.getWorld().dropItemNaturally(loc, item);
                         }
                         block.setType(block.getType());
-                        System.out.println(block.getDrops());
                         it.setCancelled(true);
                     } else {
                         it.setCancelled(true);
@@ -289,10 +319,10 @@ public class AbilityHandler implements Utils, Listener {
         //Demeter
 
         //Hephaestus
-        if(isItem(player, "hephaestusitem")){
+        if (isItem(player, "hephaestusitem")) {
             Location blockLoc = it.getBlock().getLocation();
             Collection<ItemStack> drops = it.getBlock().getDrops(it.getPlayer().getInventory().getItemInMainHand());
-            for (ItemStack item : drops){
+            for (ItemStack item : drops) {
                 blockLoc.getWorld().dropItemNaturally(blockLoc, smelt(item));
             }
         }
@@ -302,6 +332,7 @@ public class AbilityHandler implements Utils, Listener {
 
     final Set<UUID> aphroditeCharm = new HashSet<>();
     final List<LivingEntity> charmedMob = new ArrayList<>();
+
     @EventHandler
     public void onInteract(PlayerInteractEvent it) {
 
@@ -310,18 +341,20 @@ public class AbilityHandler implements Utils, Listener {
 
             Player player = it.getPlayer();
             //Artemis
-            if (isSet(player, "artemis")){
-                if (glowAura.contains(player.getUniqueId())) {return;}
+            if (isSet(player, "artemis")) {
+                if (glowAura.contains(player.getUniqueId())) {
+                    return;
+                }
                 List<Entity> nearbyEntities = player.getNearbyEntities(65, 25, 65);
 
-                for (Entity entity : nearbyEntities){
-                    if (entity == player)return;
+                for (Entity entity : nearbyEntities) {
+                    if (entity == player) return;
                     entity.setGlowing(true);
                 }
                 Bukkit.getScheduler().runTaskLater(SurvivalOverhaul.getInstance(), () -> {
-                    for(Entity entity : nearbyEntities)
+                    for (Entity entity : nearbyEntities)
                         entity.setGlowing(false);
-                    }, 10L * 20);
+                }, 10L * 20);
                 glowAura.add(player.getUniqueId());
                 Bukkit.getScheduler().runTaskLater(SurvivalOverhaul.getInstance(), () -> glowAura.remove(player.getUniqueId()), 60L * 20);
 
@@ -340,6 +373,9 @@ public class AbilityHandler implements Utils, Listener {
                             int age = crops.getState().getData();
                             if (age == getMaxAge(block.getType())) {
                                 Collection<ItemStack> droppedItems = block.getDrops();
+                                if (rng.nextInt(250) == 0) {
+                                    droppedItems.add(cropDrops.get(rng.nextInt(cropDrops.size())));
+                                }
                                 for (ItemStack item : droppedItems) {
                                     loc.getWorld().dropItemNaturally(loc, item);
                                 }
@@ -364,10 +400,10 @@ public class AbilityHandler implements Utils, Listener {
             //Demeter
 
             //Aphrodite
-            if (isItem(player, "aphroditeitem")){
+            if (isItem(player, "aphroditeitem")) {
                 if (aphroditeCharm.contains(player.getUniqueId())) return;
-                List<Entity> entityList = player.getNearbyEntities(10, 5,10);
-                for (Entity entity : entityList){
+                List<Entity> entityList = player.getNearbyEntities(10, 5, 10);
+                for (Entity entity : entityList) {
                     if (!(entity instanceof LivingEntity)) continue;
                     if (entity == player) continue;
                     LivingEntity livingEntity = (LivingEntity) entity;
@@ -411,8 +447,33 @@ public class AbilityHandler implements Utils, Listener {
                 hermesCooldown.add(player.getUniqueId());
                 Bukkit.getScheduler().runTaskLater(SurvivalOverhaul.getInstance(), () -> hermesCooldown.remove(player.getUniqueId()), 5L * 20);
             }
-
             //Hermes
+
+            //Dionysus
+            if (isItem(player, "dionysusitem")) {
+                it.setCancelled(true);
+                if (dionysusCooldown.contains(player.getUniqueId())) return;
+                World world = player.getWorld();
+                Location location = player.getEyeLocation();
+                Player shooter = it.getPlayer();
+
+                ItemStack potion = new ItemStack(Material.SPLASH_POTION);
+
+                PotionMeta meta = (PotionMeta) potion.getItemMeta();
+                meta.addCustomEffect(new PotionEffect(PotionEffectType.CONFUSION, 400, 4), true); // 200 ticks, potency 1
+                potion.setItemMeta(meta);
+
+                ThrownPotion thrownPotion = world.spawn(shooter.getEyeLocation(), ThrownPotion.class);
+
+                thrownPotion.setItem(potion);
+
+                Vector direction = shooter.getEyeLocation().getDirection().multiply(1.5);
+                thrownPotion.setVelocity(direction);
+                dionysusCooldown.add(player.getUniqueId());
+                Bukkit.getScheduler().runTaskLater(SurvivalOverhaul.getInstance(), () -> dionysusCooldown.remove(player.getUniqueId()), 30L * 20);
+
+            }
+            //Dionysus
         }
 
     }
@@ -421,6 +482,7 @@ public class AbilityHandler implements Utils, Listener {
     private final Set<UUID> demeterHarvest = new HashSet<>();
     private final Set<UUID> glowAura = new HashSet<>();
     private final Set<UUID> hermesCooldown = new HashSet<>();
+    private final Set<UUID> dionysusCooldown = new HashSet<>();
 
     @EventHandler
     public void onPlayerJump(PlayerJumpEvent it) {
@@ -464,14 +526,14 @@ public class AbilityHandler implements Utils, Listener {
             //Hermes
 
             //Apollo
-            if(isSet(player, "apollo")){
+            if (isSet(player, "apollo")) {
                 if (it.getCause() == EntityDamageEvent.DamageCause.FIRE || it.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK)
                     it.setCancelled(true);
             }
             //Apollo
 
             //Hephaestus
-            if(isSet(player, "hephaestus")){
+            if (isSet(player, "hephaestus")) {
                 if (it.getCause() == EntityDamageEvent.DamageCause.FIRE || it.getCause() == EntityDamageEvent.DamageCause.FIRE_TICK || it.getCause() == EntityDamageEvent.DamageCause.LAVA)
                     it.setCancelled(true);
             }
@@ -480,11 +542,11 @@ public class AbilityHandler implements Utils, Listener {
 
 
     }
+
     @EventHandler
-    public void onTridentThrow(ProjectileLaunchEvent it){
+    public void onTridentThrow(ProjectileLaunchEvent it) {
         if (!(it.getEntity().getShooter() instanceof Player)) return;
         Player player = (Player) it.getEntity().getShooter();
-
 
 
         ItemStack itemStack = player.getInventory().getItemInMainHand();
@@ -495,8 +557,9 @@ public class AbilityHandler implements Utils, Listener {
         List<Entity> nearbyEntities = player.getNearbyEntities(20, 5, 20);
 
         for (Entity entity : nearbyEntities) {
-            if (entity == player || !(entity instanceof Damageable) || entity.getType() == EntityType.ENDERMAN) continue;
-            Location targetLoc = entity.getLocation().add(0, 0.5, 0) ;
+            if (entity == player || !(entity instanceof Damageable) || entity.getType() == EntityType.ENDERMAN)
+                continue;
+            Location targetLoc = entity.getLocation().add(0, 0.5, 0);
 
             if (hasClearLineOfSight(playerLoc, targetLoc)) {
                 it.setCancelled(true);
