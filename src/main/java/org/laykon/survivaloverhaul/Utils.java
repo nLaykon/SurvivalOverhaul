@@ -8,15 +8,14 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.util.Vector;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -161,7 +160,7 @@ public interface Utils {
     }
 
     default boolean isItem(Player player, String tag) {
-        if (player.getInventory().getItemInMainHand() == null) return false;
+        if (player.getInventory().getItemInMainHand().isEmpty()) return false;
         if (player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(SurvivalOverhaul.getInstance(), tag), PersistentDataType.STRING)) {
             return true;
         }
@@ -269,20 +268,28 @@ public interface Utils {
         return b.toString();
     }
 
-    default ItemStack buildCustomItem(Material material, String name, String key, String... strings) {
-        ItemStack itemStack = new ItemStack(material);
-        ItemMeta meta = itemStack.getItemMeta();
-        meta.setDisplayName(hexColour(name));
-        meta.setUnbreakable(true);
-        List<String> lore = new ArrayList<>();
-        lore.addAll(Arrays.stream(strings).toList());
+    default ItemStack buildCustomItem(final Material material, final String itemName, final String key, final String... loreStrings) {
+        var lore = new ArrayList<>(Arrays.stream(loreStrings).toList());
         lore.add(" ");
-        lore.add("§x§8§0§0§0§C§A§lMYTHICAL");
+        lore.add("&#8000CA&lMYTHICAL");
         lore.replaceAll(this::hexColour);
 
+        UUID uniqueItemID = UUID.randomUUID();
 
+        var itemStack = new ItemStack(material);
+
+        var meta = itemStack.getItemMeta();
+        meta.setDisplayName(hexColour(itemName));
         meta.setLore(lore);
-        meta.getPersistentDataContainer().set(new NamespacedKey(SurvivalOverhaul.getInstance(), key), PersistentDataType.STRING, "true");
+        meta.setUnbreakable(true);
+        meta.setCustomModelData(1);
+
+        // This _needs_to be a String type
+        var itemKey = new NamespacedKey(SurvivalOverhaul.getInstance(), key);
+        meta.getPersistentDataContainer().set(itemKey, PersistentDataType.STRING, "true");
+        meta.getPersistentDataContainer().set(new NamespacedKey(SurvivalOverhaul.getInstance(), "UniqueID"), PersistentDataType.STRING, uniqueItemID.toString());
+
+        // Yes, you have to set it even though we called a get before with a pass on reference... #Minecraft
         itemStack.setItemMeta(meta);
 
         return itemStack;
@@ -296,6 +303,7 @@ public interface Utils {
                 material == Material.NETHER_WART ||
                 material == Material.COCOA;
     }
+
     default int getMaxAge(Material material){
         if (material == Material.WHEAT ||
             material == Material.CARROTS ||
@@ -323,7 +331,14 @@ public interface Utils {
     }
     default List<Block> getNearbyBlocks(Location location, int radius) {
         List<Block> nearbyBlocks = new ArrayList<>();
-        World world = location.getWorld();
+        World world = null;
+        try {
+            world = location.getWorld();
+        }catch (Exception e){
+            Bukkit.getLogger().info("World not found for 'getNearbyBlocks'");
+        }
+
+
         if (world != null) {
             int minX = location.getBlockX() - radius;
             int minY = location.getBlockY() - radius;
@@ -356,5 +371,47 @@ public interface Utils {
         }
 
         return closestEntity;
+    }
+    default boolean hasClearLineOfSight(Location start, Location end) {
+        World world = start.getWorld();
+        if (world == null) return false;
+
+        Vector direction = end.toVector().subtract(start.toVector()).normalize();
+        double distance = start.distance(end);
+        Location loc = start.clone();
+
+        for (int i = 0; i < distance; i++) {
+            loc.add(direction);
+            Block block = loc.getBlock();
+            //Bukkit.broadcastMessage("Checking block at " + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ() + ": " + block.getType());
+            if (!(block.isPassable())) {
+                return false; // Solid block in the way
+            }
+        }
+
+        return true; // No solid blocks in the way
+    }
+    default boolean isDupe(Inventory inventory, ItemStack itemPickedUp){
+        if (!(itemPickedUp.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid")))) return false;
+        UUID uuid = UUID.fromString(Objects.requireNonNull(itemPickedUp.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid"), PersistentDataType.STRING)));
+        for (ItemStack itemStack : inventory){
+            if (!(itemStack.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid")))) continue;
+
+            if(itemPickedUp.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid"), PersistentDataType.STRING) == itemStack.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid"), PersistentDataType.STRING)){
+                return true;
+            }
+
+        }
+        return false;
+    }
+
+    default ItemStack smelt (ItemStack itemStack){
+        switch (itemStack.getType()){
+            case RAW_IRON -> itemStack.setType(Material.IRON_INGOT);
+            case RAW_COPPER -> itemStack.setType(Material.COPPER_INGOT);
+            case RAW_GOLD -> itemStack.setType(Material.GOLD_INGOT);
+        }
+
+        return itemStack;
     }
 }

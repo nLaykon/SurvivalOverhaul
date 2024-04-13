@@ -8,8 +8,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.laykon.survivaloverhaul.CustomItems.Commands.OlymianGiveCommand;
+import org.laykon.survivaloverhaul.CustomItems.Commands.OlympianGiveCommand;
 import org.laykon.survivaloverhaul.CustomItems.EventHandling.AbilityHandler;
+import org.laykon.survivaloverhaul.CustomItems.LootTableHandler;
 import org.laykon.survivaloverhaul.Utility.ConfigManager;
 import org.laykon.survivaloverhaul.events.ChatFormattingListener;
 import org.laykon.survivaloverhaul.fishing.FishingListener;
@@ -29,12 +30,13 @@ public final class SurvivalOverhaul extends JavaPlugin implements Utils {
         instance = this;
         cfg = new ConfigManager(this);
         cmd("fly", new Fly());
-        cmd("dev/giveolympian", new OlymianGiveCommand());
+        cmd("dev/giveolympian", new OlympianGiveCommand());
         cmd("feed", new Feed());
 
         event(new FishingListener());
         event(new ChatFormattingListener());
         event(new AbilityHandler());
+        event(new LootTableHandler());
 
 
         myTask = new MyTask();
@@ -56,7 +58,21 @@ public final class SurvivalOverhaul extends JavaPlugin implements Utils {
                 if (isSet(player, "poseidon"))
                     player.setRemainingAir(player.getMaximumAir());
 
+                if (isSet(player, "apollo"))
+                    player.addPotionEffect(PotionEffectType.INCREASE_DAMAGE.createEffect(110, 0));
 
+                if (isSet(player, "ares"))
+                    player.addPotionEffect(PotionEffectType.INCREASE_DAMAGE.createEffect(110, 1));
+
+                if (isItem(player, "hephaestusitem"))
+                    player.addPotionEffect(PotionEffectType.FAST_DIGGING.createEffect(110, 1));
+
+                if (isSet(player, "aphrodite"))
+                    player.addPotionEffect(PotionEffectType.HERO_OF_THE_VILLAGE.createEffect(110, 0));
+
+                if (isItem(player, "hermesitem")){
+                    player.addPotionEffect(PotionEffectType.FAST_DIGGING.createEffect(110, 1));
+                }
             }
         }
     }
@@ -66,6 +82,7 @@ public final class SurvivalOverhaul extends JavaPlugin implements Utils {
         HandlerList.unregisterAll(new ChatFormattingListener());
         HandlerList.unregisterAll(new FishingListener());
         HandlerList.unregisterAll(new AbilityHandler());
+        HandlerList.unregisterAll(new LootTableHandler());
 
         myTask.cancel();
 

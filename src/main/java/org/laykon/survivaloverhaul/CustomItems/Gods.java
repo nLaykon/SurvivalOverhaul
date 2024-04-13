@@ -4,7 +4,6 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.laykon.survivaloverhaul.Utils;
 
-import java.util.ArrayList;
 
 public enum Gods implements Utils {
     ZEUS(Material.DIAMOND_HELMET, Material.DIAMOND_CHESTPLATE, Material.DIAMOND_LEGGINGS, Material.DIAMOND_BOOTS, Material.DIAMOND_AXE, "&#FFC000&lThunderlord's ", "Crown", "Chestplate", "Leggings", "Boots", "&#FFC000&lThunderbolt Hammer", "zeus",
@@ -65,21 +64,19 @@ public enum Gods implements Utils {
 
     ARES(Material.IRON_HELMET, Material.IRON_CHESTPLATE, Material.IRON_LEGGINGS, Material.IRON_BOOTS, Material.IRON_SWORD, "&#710000&lWarlord's ", "Helm", "Chestplate", "Leggings", "Boots", "&#710000&lBlade of Chaos", "ares",
             new String[]{" ", "&f&lSet Bonus:",
-                    "&#C8C8C8Provides increased melee damage",
-                    "&#C8C8C8and resistance to knockback."},
+                    "&#C8C8C8Provides increased melee damage."},
             new String[]{" ", "&f&lAbility:",
-                    "&#C8C8C8Inflicts additional damage over time on enemies and has a",
-                    "&#C8C8C8chance to cause chaos, making enemies attack each other."}),
+                    "&#C8C8C8Inflicts damage on all nearby enemies,",
+                    "&#C8C8C8be aware. this could backfire."}),
 
     HEPHAESTUS(Material.IRON_HELMET, Material.IRON_CHESTPLATE, Material.IRON_LEGGINGS, Material.IRON_BOOTS, Material.IRON_PICKAXE, "&#626262&lMaster's ", "Helmet", "Chestplate", "Leggings", "Boots", "&#626262&lHammer of the Forge", "hephaestus",
             new String[]{" ", "&f&lSet Bonus:",
-                    "&#C8C8C8Provides immunity to lava and fire damage,",
-                    "&#C8C8C8and allows the player to smelt items faster."},
+                    "&#C8C8C8Provides immunity to lava and fire damage,"},
             new String[]{" ", "&f&lAbility:",
                     "&#C8C8C8Grants the ability to break blocks",
                     "&#C8C8C8faster and smelts mined ores."}),
 
-    APHRODITE(Material.LEATHER_HELMET, Material.LEATHER_CHESTPLATE, Material.LEATHER_LEGGINGS, Material.LEATHER_BOOTS, Material.GOLDEN_SWORD, "&#C10000&lEnchanting ", "Cap", "Tunic", "Pants", "Boots", "Charm's Kiss", "aphrodite",
+    APHRODITE(Material.LEATHER_HELMET, Material.LEATHER_CHESTPLATE, Material.LEATHER_LEGGINGS, Material.LEATHER_BOOTS, Material.GOLDEN_SWORD, "&#C10000&lEnchanting ", "Cap", "Tunic", "Pants", "Boots", "&#C8C8C8Charm's Kiss", "aphrodite",
             new String[]{" ", "&f&lSet Bonus:",
                     "&#C8C8C8Increases the player's charm and persuasion",
                     "&#C8C8C8abilities with villagers and mobs."},
@@ -103,11 +100,12 @@ public enum Gods implements Utils {
                     "&#C8C8C8Releases a splash of wine that temporarily",
                     "&#C8C8C8disorients enemies and heals the player."});
 
-    final Material helm;
-    final Material chest;
+    final Material helmet;
+    final Material chestplate;
     final Material legs;
     final Material feet;
-    final Material item;
+    final Material handItem;
+
     final String prefix;
     final String helmSuffix;
     final String chestSuffix;
@@ -115,16 +113,17 @@ public enum Gods implements Utils {
     final String feetSuffix;
     final String itemName;
     final String key;
+
     final String[] Armour;
     final String[] Item;
 
 
-    Gods(Material helm, Material chest, Material legs, Material feet, Material item, String prefix, String helmSuffix, String chestSuffix, String legsSuffix, String feetSuffix, String itemName, String key, String[] armour, String[] item1) {
-        this.helm = helm;
-        this.chest = chest;
+    Gods(Material helm, Material chest, Material legs, Material feet, Material material, String prefix, String helmSuffix, String chestSuffix, String legsSuffix, String feetSuffix, String itemName, String key, String[] armour, String[] item1) {
+        this.helmet = helm;
+        this.chestplate = chest;
         this.legs = legs;
         this.feet = feet;
-        this.item = item;
+        this.handItem = material;
         this.prefix = prefix;
         this.helmSuffix = helmSuffix;
         this.chestSuffix = chestSuffix;
@@ -132,38 +131,21 @@ public enum Gods implements Utils {
         this.feetSuffix = feetSuffix;
         this.itemName = itemName;
         this.key = key;
-        Armour = armour;
-        Item = item1;
+        this.Armour = armour;
+        this.Item = item1;
     }
 
-    public ItemStack getItem(OlympianSets set) {
-        if (set == OlympianSets.HELMET) {
-            return buildCustomItem(helm, prefix + helmSuffix, key, Armour);
-        }
-        if (set == OlympianSets.CHESTPLATE) {
-            return buildCustomItem(chest, prefix + chestSuffix, key, Armour);
-        }
-        if (set == OlympianSets.LEGGINGS) {
-            return buildCustomItem(legs, prefix + legsSuffix, key, Armour);
-        }
-        if (set == OlympianSets.BOOTS) {
-            return buildCustomItem(feet, prefix + feetSuffix, key, Armour);
-        }
-        if (set == OlympianSets.ITEM) {
-            return buildCustomItem(item, itemName, key+"item", Item);
-        }
-        return null;
+    public static Gods get(String value) {
+        return valueOf(value.toUpperCase());
     }
 
-    public ArrayList<ItemStack> getSet(OlympianSets set){
-        if (set == null) return null;
-        ArrayList<ItemStack> items = new ArrayList<>();
-        items.add(buildCustomItem(helm, prefix + helmSuffix, key, Armour));
-        items.add(buildCustomItem(chest, prefix + chestSuffix, key, Armour));
-        items.add(buildCustomItem(legs, prefix + legsSuffix, key, Armour));
-        items.add(buildCustomItem(feet, prefix + feetSuffix, key, Armour));
-        items.add(buildCustomItem(item, itemName, key+"item", Item));
-
-        return items;
+    public ItemStack getItem(final OlympianItem set) {
+        return switch (set) {
+            case HELMET -> buildCustomItem(helmet, prefix + helmSuffix, key, Armour);
+            case CHESTPLATE -> buildCustomItem(chestplate, prefix + chestSuffix, key, Armour);
+            case LEGGINGS -> buildCustomItem(legs, prefix + legsSuffix, key, Armour);
+            case BOOTS -> buildCustomItem(feet, prefix + feetSuffix, key, Armour);
+            case ITEM -> buildCustomItem(handItem, itemName, key + "item", Item);
+        };
     }
 }
