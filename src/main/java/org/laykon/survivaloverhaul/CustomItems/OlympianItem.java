@@ -1,6 +1,6 @@
 package org.laykon.survivaloverhaul.CustomItems;
 
-import org.laykon.survivaloverhaul.Utils;
+import org.laykon.survivaloverhaul.Utility.Utils;
 
 public enum OlympianItem implements Utils {
     HELMET,

@@ -5,7 +5,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.server.ServerCommandEvent;
-import org.laykon.survivaloverhaul.Utils;
+import org.laykon.survivaloverhaul.Utility.Utils;
 
 import java.util.ArrayList;
 import java.util.List;

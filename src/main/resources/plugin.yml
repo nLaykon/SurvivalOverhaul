@@ -10,3 +10,11 @@ commands:
     permission: "so.olympian"
   feed:
     permission: "so.feed"
+  dtn:
+    permission: "so.dtn"
+  spawnboss:
+    permission: "so.spawnboss"
+  dev/data/write:
+    permission: "so.writedata"
+  dev/data/read:
+    permission: "so.readdata"

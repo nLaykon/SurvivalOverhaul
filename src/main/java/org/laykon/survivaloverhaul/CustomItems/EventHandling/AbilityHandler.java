@@ -1,10 +1,7 @@
 package org.laykon.survivaloverhaul.CustomItems.EventHandling;
 
 import com.destroystokyo.paper.event.player.PlayerJumpEvent;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.enchantments.Enchantment;
@@ -18,15 +15,17 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.PotionMeta;
 import org.bukkit.material.Crops;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
+import org.joml.Random;
 import org.laykon.survivaloverhaul.CustomItems.Gods;
 import org.laykon.survivaloverhaul.CustomItems.OlympianItem;
 import org.laykon.survivaloverhaul.SurvivalOverhaul;
-import org.laykon.survivaloverhaul.Utils;
+import org.laykon.survivaloverhaul.Utility.Utils;
 
 import java.util.*;
 
@@ -45,7 +44,7 @@ public class AbilityHandler implements Utils, Listener {
 
     Random rng = new Random();
 
-    List<ItemStack> cropDrops = new ArrayList<>(Arrays.asList(
+    ArrayList<ItemStack> cropDrops = new ArrayList<ItemStack>(Arrays.asList(
             Gods.DEMETER.getItem(OlympianItem.HELMET),
             Gods.DEMETER.getItem(OlympianItem.CHESTPLATE),
             Gods.DEMETER.getItem(OlympianItem.LEGGINGS),
@@ -63,7 +62,7 @@ public class AbilityHandler implements Utils, Listener {
         if (isItem(player, "apolloitem")) {
             event.setCancelled(true);
             long time = player.getWorld().getTime();
-            Integer damageLevel = event.getBow().getEnchantmentLevel(Enchantment.ARROW_DAMAGE);
+            var damageLevel = event.getBow().getEnchantmentLevel(Enchantment.ARROW_DAMAGE);
             double damageAmount = (7.0 + (2.7 * damageLevel)) * event.getForce();
 
             if (time > 0 && time < 12000) {
@@ -188,7 +187,7 @@ public class AbilityHandler implements Utils, Listener {
         //Hera
         if (damager instanceof Player) {
             if (isItem((Player) damager, "heraitem")) {
-                if (rng.nextInt(5) == 0) {
+                if (rng.nextInt(3) == 0) {
                     if (!(damaged instanceof Player)) {
                         List<Entity> entityList = damaged.getNearbyEntities(10, 10, 10);
                         if (!entityList.isEmpty()) {
@@ -196,7 +195,7 @@ public class AbilityHandler implements Utils, Listener {
                             int randomIndex = rng.nextInt(entityList.size());
                             Entity randomEntity = entityList.get(randomIndex);
 
-                            if (randomEntity instanceof LivingEntity && randomEntity != (Entity) damager) {
+                            if (randomEntity instanceof LivingEntity && randomEntity != damager) {
                                 ((LivingEntity) damaged).attack(randomEntity);
                             }
                         }
@@ -225,14 +224,14 @@ public class AbilityHandler implements Utils, Listener {
         if (damager instanceof Player) {
             Player player = (Player) damager;
             if (isItem(player, "aresitem")) {
-                List<Entity> entityList = player.getNearbyEntities(5, 4, 5);
+                List<Entity> entityList = player.getNearbyEntities(7, 4, 7);
                 for (Entity entity : entityList) {
                     if (entity == player) continue;
                     if (!(entity instanceof Damageable)) continue;
                     ((Damageable) entity).damage(it.getDamage());
                 }
                 if (rng.nextInt(10) == 0) {
-                    player.damage(it.getDamage() / 2);
+                    player.damage(it.getDamage() / 3);
                 }
             }
         }
@@ -285,6 +284,18 @@ public class AbilityHandler implements Utils, Listener {
 
 
     }
+
+    @EventHandler
+    public void onProjectileHit(ProjectileHitEvent it) {
+        if (it.getEntity().getType() == EntityType.TRIDENT) {
+            //Poseidon
+            if (it.getEntity().getPersistentDataContainer().has(new NamespacedKey(SurvivalOverhaul.getInstance(), "poseidonitem"), PersistentDataType.STRING)) {
+                createWhirlpool((Player) it.getEntity().getShooter(), it.getEntity().getLocation());
+            }
+            //Poseidon
+        }
+    }
+
 
     @EventHandler
     public void onBlockBreak(BlockBreakEvent it) {
@@ -484,6 +495,8 @@ public class AbilityHandler implements Utils, Listener {
     private final Set<UUID> hermesCooldown = new HashSet<>();
     private final Set<UUID> dionysusCooldown = new HashSet<>();
 
+
+
     @EventHandler
     public void onPlayerJump(PlayerJumpEvent it) {
 
@@ -548,6 +561,9 @@ public class AbilityHandler implements Utils, Listener {
         if (!(it.getEntity().getShooter() instanceof Player)) return;
         Player player = (Player) it.getEntity().getShooter();
 
+        if (isItem(player, "poseidonitem")) {
+            it.getEntity().getPersistentDataContainer().set(NamespacedKeys.getKey("poseidonitem"), PersistentDataType.STRING, "true");
+        }
 
         ItemStack itemStack = player.getInventory().getItemInMainHand();
         if (!isItem(player, "athenaitem")) return;

@@ -2,7 +2,7 @@ package org.laykon.survivaloverhaul.CustomItems;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
-import org.laykon.survivaloverhaul.Utils;
+import org.laykon.survivaloverhaul.Utility.Utils;
 
 
 public enum Gods implements Utils {

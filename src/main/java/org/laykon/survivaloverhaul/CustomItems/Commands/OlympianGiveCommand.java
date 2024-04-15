@@ -7,7 +7,7 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.laykon.survivaloverhaul.CustomItems.Gods;
 import org.laykon.survivaloverhaul.CustomItems.OlympianItem;
-import org.laykon.survivaloverhaul.Utils;
+import org.laykon.survivaloverhaul.Utility.Utils;
 
 
 public class OlympianGiveCommand implements CommandExecutor, Utils {

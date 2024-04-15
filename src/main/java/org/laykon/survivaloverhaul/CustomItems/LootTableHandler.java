@@ -2,23 +2,19 @@ package org.laykon.survivaloverhaul.CustomItems;
 
 
 import io.papermc.paper.event.player.PlayerTradeEvent;
-import org.bukkit.Location;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.Crops;
-import org.laykon.survivaloverhaul.Utils;
+import org.laykon.survivaloverhaul.SurvivalOverhaul;
+import org.laykon.survivaloverhaul.Utility.Utils;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 
 public class LootTableHandler implements Utils, Listener {
@@ -86,19 +82,35 @@ public class LootTableHandler implements Utils, Listener {
             Gods.APOLLO.getItem(OlympianItem.ITEM)
     ));
     List<ItemStack> endermanDrops = new ArrayList<>(Arrays.asList(
-    Gods.HERMES.getItem(OlympianItem.HELMET),
+            Gods.HERMES.getItem(OlympianItem.HELMET),
             Gods.HERMES.getItem(OlympianItem.CHESTPLATE),
             Gods.HERMES.getItem(OlympianItem.LEGGINGS),
             Gods.HERMES.getItem(OlympianItem.BOOTS),
             Gods.HERMES.getItem(OlympianItem.ITEM)
     ));
 
+    private final Set<UUID> treeCapCooldown = new HashSet<>();
+
     @EventHandler
     public void onBlockBreak(BlockBreakEvent it) {
+
+        Player player = it.getPlayer();
         Block block = it.getBlock();
         if (block.getType() == Material.STONE) {
             if (rng.nextInt(200) == 0) {
                 block.getWorld().dropItemNaturally(block.getLocation(), blockBreakDrops.get(rng.nextInt(blockBreakDrops.size())));
+            }
+        }
+        if (isLog(block.getType())) {
+            if (rng.nextInt(200) == 0) {
+                it.getPlayer().getWorld().dropItemNaturally(block.getLocation(), buildCustomItem(Material.GOLDEN_AXE, "&#F6FF00&lTree Capitator", "treecap", 1, " ", "&f&lItem Ability:", "&#C8C8C8Breaks a full tree instead", "&#C8C8C8of just a singular block"));
+            }
+            if (treeCapCooldown.contains(player.getUniqueId())) return;
+            if (isItem(player, "treecap")){
+                it.setCancelled(true);
+                breakWood(block);
+                treeCapCooldown.add(player.getUniqueId());
+                Bukkit.getScheduler().runTaskLater(SurvivalOverhaul.getInstance(), () -> treeCapCooldown.remove(player.getUniqueId()), 1L * 20);
             }
         }
     }

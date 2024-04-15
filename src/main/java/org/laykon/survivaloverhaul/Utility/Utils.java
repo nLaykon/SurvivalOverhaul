@@ -1,4 +1,4 @@
-package org.laykon.survivaloverhaul;
+package org.laykon.survivaloverhaul.Utility;
 
 
 import org.bukkit.*;
@@ -6,6 +6,7 @@ import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Damageable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
@@ -16,7 +17,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
+import org.laykon.survivaloverhaul.CustomItems.EventHandling.NamespacedKeys;
+import org.laykon.survivaloverhaul.SurvivalOverhaul;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -150,13 +154,13 @@ public interface Utils {
         if (player.getInventory().getLeggings() == null) return false;
         if (player.getInventory().getBoots() == null) return false;
 
-        if (!(player.getInventory().getHelmet().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(SurvivalOverhaul.getInstance(), tag), PersistentDataType.STRING)))
+        if (!(player.getInventory().getHelmet().getItemMeta().getPersistentDataContainer().has(NamespacedKeys.getKey(tag))))
             return false;
-        if (!(player.getInventory().getChestplate().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(SurvivalOverhaul.getInstance(), tag), PersistentDataType.STRING)))
+        if (!(player.getInventory().getChestplate().getItemMeta().getPersistentDataContainer().has(NamespacedKeys.getKey(tag))))
             return false;
-        if (!(player.getInventory().getLeggings().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(SurvivalOverhaul.getInstance(), tag), PersistentDataType.STRING)))
+        if (!(player.getInventory().getLeggings().getItemMeta().getPersistentDataContainer().has(NamespacedKeys.getKey(tag))))
             return false;
-        if (!(player.getInventory().getBoots().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(SurvivalOverhaul.getInstance(), tag), PersistentDataType.STRING)))
+        if (!(player.getInventory().getBoots().getItemMeta().getPersistentDataContainer().has(NamespacedKeys.getKey(tag))))
             return false;
 
         return true;
@@ -164,7 +168,7 @@ public interface Utils {
 
     default boolean isItem(Player player, String tag) {
         if (player.getInventory().getItemInMainHand().isEmpty()) return false;
-        if (player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().has(new NamespacedKey(SurvivalOverhaul.getInstance(), tag), PersistentDataType.STRING)) {
+        if (player.getInventory().getItemInMainHand().getItemMeta().getPersistentDataContainer().has(NamespacedKeys.getKey(tag))) {
             return true;
         }
         return false;
@@ -282,11 +286,10 @@ public interface Utils {
         var itemStack = new ItemStack(material);
 
         var meta = itemStack.getItemMeta();
-        //Checks if its armor, if it is, adds armor and armor toughness
         if (isArmor(material)){
-            AttributeModifier armorToughness = new AttributeModifier(UUID.randomUUID(), "random", 4.0, AttributeModifier.Operation.ADD_NUMBER, getArmorSlot(itemStack));
+            AttributeModifier armorToughness = new AttributeModifier(UUID.randomUUID(), "random", 2.0, AttributeModifier.Operation.ADD_NUMBER, getArmorSlot(itemStack));
             meta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, armorToughness);
-            AttributeModifier armor = new AttributeModifier(UUID.randomUUID(), "random", 7.0, AttributeModifier.Operation.ADD_NUMBER, getArmorSlot(itemStack));
+            AttributeModifier armor = new AttributeModifier(UUID.randomUUID(), "random", 4.0, AttributeModifier.Operation.ADD_NUMBER, getArmorSlot(itemStack));
             meta.addAttributeModifier(Attribute.GENERIC_ARMOR, armor);
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             meta.addItemFlags(ItemFlag.HIDE_UNBREAKABLE);
@@ -300,7 +303,7 @@ public interface Utils {
         // This _needs_to be a String type
         var itemKey = new NamespacedKey(SurvivalOverhaul.getInstance(), key);
         meta.getPersistentDataContainer().set(itemKey, PersistentDataType.STRING, "true");
-        meta.getPersistentDataContainer().set(new NamespacedKey(SurvivalOverhaul.getInstance(), "UniqueID"), PersistentDataType.STRING, uniqueItemID.toString());
+        meta.getPersistentDataContainer().set(NamespacedKeys.getKey(key), PersistentDataType.STRING, uniqueItemID.toString());
 
         // Yes, you have to set it even though we called a get before with a pass on reference... #Minecraft
         itemStack.setItemMeta(meta);
@@ -315,6 +318,16 @@ public interface Utils {
                 material == Material.BEETROOTS ||
                 material == Material.NETHER_WART ||
                 material == Material.COCOA;
+    }
+    default boolean isLog(Material material) {
+        return material == Material.OAK_LOG ||
+                material == Material.DARK_OAK_LOG ||
+                material == Material.SPRUCE_LOG ||
+                material == Material.JUNGLE_LOG ||
+                material == Material.BIRCH_LOG ||
+                material == Material.ACACIA_LOG ||
+                material == Material.CHERRY_LOG ||
+                material == Material.MANGROVE_LOG;
     }
 
     default int getMaxAge(Material material){
@@ -494,5 +507,76 @@ public interface Utils {
                 return false;
         }
     }
+    default void createWhirlpool(Player player, Location location) {
+        final double DAMAGE_PER_TICK = 4.0;
+        final double PULL_FORCE = 0.2;
+        final int DURATION = 100;
+        new BukkitRunnable() {
+            int ticksElapsed = 0;
+
+            @Override
+            public void run() {
+                ticksElapsed++;
+
+                if (ticksElapsed >= DURATION) {
+                    cancel();
+                    return;
+                }
+
+                for (Entity entity : location.getWorld().getNearbyEntities(location, 10, 5, 10)) {
+                    if (entity instanceof Player) {
+                        continue;
+                    }
+
+                    if (entity instanceof Damageable) {
+                        Damageable damageableEntity = (Damageable) entity;
+                        Vector direction = location.toVector().subtract(entity.getLocation().toVector()).normalize();
+                        entity.setVelocity(entity.getVelocity().add(direction.multiply(PULL_FORCE)));
+
+                        if (ticksElapsed % 10 == 0) {
+                            damageableEntity.damage(DAMAGE_PER_TICK, player);
+                        }
+                    }
+                }
+
+                location.getWorld().spawnParticle(Particle.SNOWFLAKE, location, 10, 0, 2, 0, 0.1);
+                location.getWorld().spawnParticle(Particle.SNOWFLAKE, location, 10, 0, 2.5, 0, 0.1);
+                location.getWorld().spawnParticle(Particle.SNOWFLAKE, location, 10, 0, 3, 0, 0.1);
+
+            }
+        }.runTaskTimer(SurvivalOverhaul.getInstance(), 0, 1); // Run every tick
+    }
+    default void breakWood(Block block) {
+        if (!isLog(block.getType())) {
+            return;
+        }
+        block.breakNaturally();
+
+        for (int x = -1; x <= 1; x++) {
+            for (int y = -1; y <= 1; y++) {
+                for (int z = -1; z <= 1; z++) {
+                    if (x == 0 && y == 0 && z == 0) {
+                        continue;
+                    }
+                    Block relative = block.getRelative(x, y, z);
+                    if (relative.getType() == block.getType()) {
+                        breakWood(relative);
+                    }
+                }
+            }
+        }
+
+        // Check blocks above (y + 1) and below (y - 1)
+        Block above = block.getRelative(0, 1, 0);
+        Block below = block.getRelative(0, -1, 0);
+        if (isLog(above.getType())) {
+            breakWood(above);
+        }
+        if (isLog(below.getType())) {
+            breakWood(below);
+        }
+    }
+
+
 
 }

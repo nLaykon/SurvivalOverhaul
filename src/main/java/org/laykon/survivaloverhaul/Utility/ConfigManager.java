@@ -20,7 +20,6 @@ public class ConfigManager {
         File configFile = new File(plugin.getDataFolder(), "config.yml");
 
         if (!configFile.exists()) {
-            // If config file doesn't exist, copy the default config from resources
             plugin.saveResource("config.yml", false);
         }
 

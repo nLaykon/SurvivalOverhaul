@@ -16,7 +16,7 @@ import org.laykon.survivaloverhaul.SurvivalOverhaul;
 import org.laykon.survivaloverhaul.Utility.ConfigManager;
 import org.laykon.survivaloverhaul.Utility.WeightedRandomItemPicker;
 import org.laykon.survivaloverhaul.Utility.itemBuilder;
-import org.laykon.survivaloverhaul.Utils;
+import org.laykon.survivaloverhaul.Utility.Utils;
 
 import java.util.ArrayList;
 
@@ -87,12 +87,12 @@ public class FishingListener implements Listener, Utils {
                     if (e.getPlayer().getInventory().getItem(i).getType().equals(pickedItem.getType()) && e.getPlayer().getInventory().getItem(i).getMaxStackSize() > 1) {
                         if (e.getPlayer().getInventory().getItem(i).getAmount() < e.getPlayer().getInventory().getItem(i).getMaxStackSize()) {
                             e.getPlayer().getInventory().getItem(i).setAmount(e.getPlayer().getInventory().getItem(i).getAmount() + 1);
-                            e.getPlayer().sendMessage("You caught a §6" + pickedItem.getItemMeta().getDisplayName() + "§f!");
+                            e.getPlayer().sendMessage("You caught a §6" + pickedItem.getItemMeta().getDisplayName() + " §f+ §6" + e.getExpToDrop() + "§fxp !");
                             break;
                         }
                     }
                 } else if (e.getPlayer().getInventory().getItem(i) == null) {
-                    e.getPlayer().sendMessage("You caught a §6" + pickedItem.getItemMeta().getDisplayName() + "§f!");
+                    e.getPlayer().sendMessage("You caught a §6" + pickedItem.getItemMeta().getDisplayName() + " §f+ §6" + e.getExpToDrop() + "§fxp !");
                     e.getPlayer().getInventory().setItem(i, pickedItem);
                     break;
                 }
@@ -100,6 +100,7 @@ public class FishingListener implements Listener, Utils {
                     e.getPlayer().sendMessage("Your inventory is full!");
                 }
             }
+            e.getPlayer().giveExp(e.getExpToDrop());
         }
 
 

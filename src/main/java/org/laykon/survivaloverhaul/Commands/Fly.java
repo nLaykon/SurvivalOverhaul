@@ -1,10 +1,11 @@
-package org.laykon.survivaloverhaul;
+package org.laykon.survivaloverhaul.Commands;
 
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.laykon.survivaloverhaul.Utility.Utils;
 
 public class Fly implements CommandExecutor, Utils {
     @Override

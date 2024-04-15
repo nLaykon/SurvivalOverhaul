@@ -8,15 +8,20 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.laykon.survivaloverhaul.Commands.*;
+import org.laykon.survivaloverhaul.CustomBosses.Commands.SpawnBoss;
 import org.laykon.survivaloverhaul.CustomItems.Commands.OlympianGiveCommand;
 import org.laykon.survivaloverhaul.CustomItems.EventHandling.AbilityHandler;
 import org.laykon.survivaloverhaul.CustomItems.LootTableHandler;
 import org.laykon.survivaloverhaul.Utility.ConfigManager;
+import org.laykon.survivaloverhaul.Utility.DataHandler;
+import org.laykon.survivaloverhaul.Utility.Utils;
 import org.laykon.survivaloverhaul.events.ChatFormattingListener;
 import org.laykon.survivaloverhaul.fishing.FishingListener;
 
 public final class SurvivalOverhaul extends JavaPlugin implements Utils {
     private ConfigManager cfg;
+    private DataHandler data;
     private static SurvivalOverhaul instance;
 
     public static SurvivalOverhaul getInstance() {
@@ -29,9 +34,14 @@ public final class SurvivalOverhaul extends JavaPlugin implements Utils {
     public void onEnable() {
         instance = this;
         cfg = new ConfigManager(this);
+        data = new DataHandler(this);
         cmd("fly", new Fly());
         cmd("dev/giveolympian", new OlympianGiveCommand());
         cmd("feed", new Feed());
+        cmd("dtn", new Dtn());
+        cmd("spawnboss", new SpawnBoss());
+        cmd("dev/data/write", new WriteData());
+        cmd("dev/data/read", new ReadData());
 
         event(new FishingListener());
         event(new ChatFormattingListener());
@@ -43,6 +53,7 @@ public final class SurvivalOverhaul extends JavaPlugin implements Utils {
         myTask.runTaskTimer(this, 0l, 100l);
 
         System.out.println(cfg.getLoaded());
+        System.out.println(data.getLoaded());
     }
 
     private class MyTask extends BukkitRunnable {
@@ -55,8 +66,10 @@ public final class SurvivalOverhaul extends JavaPlugin implements Utils {
                 if (isSet(player, "hermes"))
                     player.addPotionEffect(PotionEffectType.SPEED.createEffect(110, 0));
 
-                if (isSet(player, "poseidon"))
+                if (isSet(player, "poseidon")) {
                     player.setRemainingAir(player.getMaximumAir());
+                    player.addPotionEffect(PotionEffectType.DOLPHINS_GRACE.createEffect(110, 0));
+                }
 
                 if (isSet(player, "apollo"))
                     player.addPotionEffect(PotionEffectType.INCREASE_DAMAGE.createEffect(110, 0));
@@ -87,6 +100,7 @@ public final class SurvivalOverhaul extends JavaPlugin implements Utils {
         myTask.cancel();
 
         cfg.reloadConfig();
+        data.reloadData();
     }
 
 
