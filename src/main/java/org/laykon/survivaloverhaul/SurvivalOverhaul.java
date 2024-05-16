@@ -10,14 +10,21 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.laykon.survivaloverhaul.Commands.*;
 import org.laykon.survivaloverhaul.CustomBosses.Commands.SpawnBoss;
+import org.laykon.survivaloverhaul.CustomItems.Automation.Commands.GiveFactory;
+import org.laykon.survivaloverhaul.CustomItems.Automation.Commands.GiveFarmer;
+import org.laykon.survivaloverhaul.CustomItems.Automation.Handlers.FactoryHandler;
+import org.laykon.survivaloverhaul.CustomItems.Automation.Handlers.FarmerHandler;
+import org.laykon.survivaloverhaul.CustomItems.Commands.GiveInfiniteEmptyBucket;
 import org.laykon.survivaloverhaul.CustomItems.Commands.OlympianGiveCommand;
 import org.laykon.survivaloverhaul.CustomItems.EventHandling.AbilityHandler;
 import org.laykon.survivaloverhaul.CustomItems.LootTableHandler;
+import org.laykon.survivaloverhaul.events.ChatFormattingListener;
+import org.laykon.survivaloverhaul.events.ScoreboardHandler;
+import org.laykon.survivaloverhaul.fishing.FishingListener;
 import org.laykon.survivaloverhaul.Utility.ConfigManager;
 import org.laykon.survivaloverhaul.Utility.DataHandler;
+import org.laykon.survivaloverhaul.Utility.JoinHandler;
 import org.laykon.survivaloverhaul.Utility.Utils;
-import org.laykon.survivaloverhaul.events.ChatFormattingListener;
-import org.laykon.survivaloverhaul.fishing.FishingListener;
 
 public final class SurvivalOverhaul extends JavaPlugin implements Utils {
     private ConfigManager cfg;
@@ -34,7 +41,7 @@ public final class SurvivalOverhaul extends JavaPlugin implements Utils {
     public void onEnable() {
         instance = this;
         cfg = new ConfigManager(this);
-        data = new DataHandler(this);
+        data = new DataHandler();
         cmd("fly", new Fly());
         cmd("dev/giveolympian", new OlympianGiveCommand());
         cmd("feed", new Feed());
@@ -42,11 +49,30 @@ public final class SurvivalOverhaul extends JavaPlugin implements Utils {
         cmd("spawnboss", new SpawnBoss());
         cmd("dev/data/write", new WriteData());
         cmd("dev/data/read", new ReadData());
+        cmd("dev/automation/givefarmer", new GiveFarmer());
+        cmd("dev/flyspeed", new FlySpeed());
+        cmd("dev/ggwave", new GGWave());
+        cmd("dev/gc/give", new AddGC());
+        cmd("dev/gc/remove", new RemoveGC());
+        cmd("dev/gc/set", new SetGC());
+        cmd("dev/gc/get", new GetGC());
+        cmd("dev/grad", new Gradiant());
+        cmd("dev/padd", new PermissionSet());
+        cmd("dev/gag", new Gag());
+        cmd("dev/givefactory", new GiveFactory());
+        cmd("dev/give/infiniteemptybucket", new GiveInfiniteEmptyBucket());
 
+        event(new JoinHandler());
         event(new FishingListener());
         event(new ChatFormattingListener());
         event(new AbilityHandler());
         event(new LootTableHandler());
+        event(new FarmerHandler());
+        event(new GGWave());
+        event(new ScoreboardHandler());
+        event(new Gag());
+        event(new FactoryHandler());
+        event(new GiveInfiniteEmptyBucket());
 
 
         myTask = new MyTask();
@@ -89,13 +115,17 @@ public final class SurvivalOverhaul extends JavaPlugin implements Utils {
             }
         }
     }
-
     @Override
     public void onDisable() {
         HandlerList.unregisterAll(new ChatFormattingListener());
         HandlerList.unregisterAll(new FishingListener());
         HandlerList.unregisterAll(new AbilityHandler());
         HandlerList.unregisterAll(new LootTableHandler());
+        HandlerList.unregisterAll(new FarmerHandler());
+        HandlerList.unregisterAll(new ScoreboardHandler());
+        HandlerList.unregisterAll(new Gag());
+        HandlerList.unregisterAll(new FactoryHandler());
+        HandlerList.unregisterAll(new GiveInfiniteEmptyBucket());
 
         myTask.cancel();
 

@@ -7,7 +7,7 @@ commands:
   fly:
     permission: "so.fly"
   dev/giveolympian:
-    permission: "so.olympian"
+    permission: "so.givecustom"
   feed:
     permission: "so.feed"
   dtn:
@@ -18,3 +18,22 @@ commands:
     permission: "so.writedata"
   dev/data/read:
     permission: "so.readdata"
+  dev/automation/givefarmer:
+    permission: "so.givecustom"
+  dev/flyspeed:
+    permission: "so.flyspeed"
+  dev/ggwave:
+    permission: "so.ggwave"
+  dev/gc/give:
+    permission: "so.gc"
+  dev/gc/set:
+    permission: "so.gc"
+  dev/gc/remove:
+    permission: "so.gc"
+  dev/gc/get:
+    permission: "so.gc"
+  dev/grad:
+  dev/padd:
+  dev/gag:
+  dev/givefactory:
+  dev/give/infiniteemptybucket:

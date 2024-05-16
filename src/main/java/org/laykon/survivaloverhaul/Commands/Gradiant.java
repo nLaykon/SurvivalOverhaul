@@ -5,15 +5,14 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-import org.laykon.survivaloverhaul.Utility.DataHandler;
+import org.laykon.survivaloverhaul.Utility.Utils;
 
-public class WriteData implements CommandExecutor {
+public class Gradiant implements CommandExecutor, Utils {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-        if (!(sender instanceof Player player)) return true;
-        DataHandler data = new DataHandler();
-        data.addOrCreate(args[0], args[1]);
-        sender.sendMessage("Value Written");
+        if (!(sender instanceof Player)) return true;
+        sender.sendMessage(gradString("Testing my String Gradiant", "#FF0000", "#00FF00"));
+        System.out.println(gradString("Testing my String Gradiant", "#FF0000", "#00FF00"));
         return true;
     }
 }

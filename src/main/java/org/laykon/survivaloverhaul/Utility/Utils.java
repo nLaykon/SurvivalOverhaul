@@ -1,6 +1,8 @@
 package org.laykon.survivaloverhaul.Utility;
 
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
@@ -15,6 +17,9 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValue;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -22,6 +27,7 @@ import org.bukkit.util.Vector;
 import org.laykon.survivaloverhaul.CustomItems.EventHandling.NamespacedKeys;
 import org.laykon.survivaloverhaul.SurvivalOverhaul;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -286,7 +292,7 @@ public interface Utils {
         var itemStack = new ItemStack(material);
 
         var meta = itemStack.getItemMeta();
-        if (isArmor(material)){
+        if (isArmor(material)) {
             AttributeModifier armorToughness = new AttributeModifier(UUID.randomUUID(), "random", 2.0, AttributeModifier.Operation.ADD_NUMBER, getArmorSlot(itemStack));
             meta.addAttributeModifier(Attribute.GENERIC_ARMOR_TOUGHNESS, armorToughness);
             AttributeModifier armor = new AttributeModifier(UUID.randomUUID(), "random", 4.0, AttributeModifier.Operation.ADD_NUMBER, getArmorSlot(itemStack));
@@ -300,10 +306,8 @@ public interface Utils {
         meta.setUnbreakable(true);
         meta.setCustomModelData(modelNum);
 
-        // This _needs_to be a String type
-        var itemKey = new NamespacedKey(SurvivalOverhaul.getInstance(), key);
-        meta.getPersistentDataContainer().set(itemKey, PersistentDataType.STRING, "true");
-        meta.getPersistentDataContainer().set(NamespacedKeys.getKey(key), PersistentDataType.STRING, uniqueItemID.toString());
+        meta.getPersistentDataContainer().set(NamespacedKeys.getKey(key), PersistentDataType.STRING, "true");
+        meta.getPersistentDataContainer().set(NamespacedKeys.getKey(uniqueItemID.toString()), PersistentDataType.STRING, "true");
 
         // Yes, you have to set it even though we called a get before with a pass on reference... #Minecraft
         itemStack.setItemMeta(meta);
@@ -315,10 +319,9 @@ public interface Utils {
         return material == Material.WHEAT ||
                 material == Material.CARROTS ||
                 material == Material.POTATOES ||
-                material == Material.BEETROOTS ||
-                material == Material.NETHER_WART ||
-                material == Material.COCOA;
+                material == Material.BEETROOTS;
     }
+
     default boolean isLog(Material material) {
         return material == Material.OAK_LOG ||
                 material == Material.DARK_OAK_LOG ||
@@ -330,37 +333,40 @@ public interface Utils {
                 material == Material.MANGROVE_LOG;
     }
 
-    default int getMaxAge(Material material){
+    default int getMaxAge(Material material) {
         if (material == Material.WHEAT ||
-            material == Material.CARROTS ||
-            material == Material.POTATOES){
+                material == Material.CARROTS ||
+                material == Material.POTATOES) {
             return 7;
         }
         if (material == Material.BEETROOTS ||
-            material == Material.NETHER_WART){
+                material == Material.NETHER_WART) {
             return 3;
         }
-        if (material == Material.COCOA){
+        if (material == Material.COCOA) {
             return 2;
         }
         return 0;
     }
+
     default void placeBlockAtLocation(Location location, Material material) {
         World world = location.getWorld();
         Block block = world.getBlockAt(location);
         block.setType(material);
     }
+
     default boolean isInWater(Player player) {
         Location loc = player.getLocation();
         Block block = loc.getBlock();
         return block.getType() == Material.WATER || block.getType() == Material.WATER;
     }
+
     default List<Block> getNearbyBlocks(Location location, int radius) {
         List<Block> nearbyBlocks = new ArrayList<>();
         World world = null;
         try {
             world = location.getWorld();
-        }catch (Exception e){
+        } catch (Exception e) {
             Bukkit.getLogger().info("World not found for 'getNearbyBlocks'");
         }
 
@@ -383,12 +389,40 @@ public interface Utils {
         }
         return nearbyBlocks;
     }
+
+    default List<Block> getSameLevelBlocks(Location location, int radius) {
+        List<Block> nearbyBlocks = new ArrayList<>();
+        World world = null;
+        try {
+            world = location.getWorld();
+        } catch (Exception e) {
+            Bukkit.getLogger().info("World not found for 'getNearbyBlocks'");
+        }
+
+
+        if (world != null) {
+            int minX = location.getBlockX() - radius;
+            int minZ = location.getBlockZ() - radius;
+            int maxX = location.getBlockX() + radius;
+            int maxZ = location.getBlockZ() + radius;
+            int y = location.getBlockY();
+            for (int x = minX; x <= maxX; x++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    Block block = world.getBlockAt(x, y, z);
+                    nearbyBlocks.add(block);
+                }
+
+            }
+        }
+        return nearbyBlocks;
+    }
+
     default Entity getNearestEntity(Player player) {
         double lowestDistance = 32;
         Entity closestEntity = null;
 
         for (Entity entity : player.getNearbyEntities(10, 10, 10)) {
-            if (entity ==  (Entity) player) continue;
+            if (entity == (Entity) player) continue;
             double distance = entity.getLocation().distance(player.getLocation());
             if (distance < lowestDistance) {
                 lowestDistance = distance;
@@ -398,6 +432,7 @@ public interface Utils {
 
         return closestEntity;
     }
+
     default boolean hasClearLineOfSight(Location start, Location end) {
         World world = start.getWorld();
         if (world == null) return false;
@@ -417,13 +452,16 @@ public interface Utils {
 
         return true; // No solid blocks in the way
     }
-    default boolean isDupe(Inventory inventory, ItemStack itemPickedUp){
-        if (!(itemPickedUp.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid")))) return false;
-        UUID uuid = UUID.fromString(Objects.requireNonNull(itemPickedUp.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid"), PersistentDataType.STRING)));
-        for (ItemStack itemStack : inventory){
-            if (!(itemStack.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid")))) continue;
 
-            if(itemPickedUp.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid"), PersistentDataType.STRING) == itemStack.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid"), PersistentDataType.STRING)){
+    default boolean isDupe(Inventory inventory, ItemStack itemPickedUp) {
+        if (!(itemPickedUp.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid"))))
+            return false;
+        UUID uuid = UUID.fromString(Objects.requireNonNull(itemPickedUp.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid"), PersistentDataType.STRING)));
+        for (ItemStack itemStack : inventory) {
+            if (!(itemStack.getItemMeta().getPersistentDataContainer().has(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid"))))
+                continue;
+
+            if (itemPickedUp.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid"), PersistentDataType.STRING) == itemStack.getItemMeta().getPersistentDataContainer().get(new NamespacedKey(SurvivalOverhaul.getInstance(), "uniqueid"), PersistentDataType.STRING)) {
                 return true;
             }
 
@@ -431,8 +469,8 @@ public interface Utils {
         return false;
     }
 
-    default ItemStack smelt (ItemStack itemStack){
-        switch (itemStack.getType()){
+    default ItemStack smelt(ItemStack itemStack) {
+        switch (itemStack.getType()) {
             case RAW_IRON -> itemStack.setType(Material.IRON_INGOT);
             case RAW_COPPER -> itemStack.setType(Material.COPPER_INGOT);
             case RAW_GOLD -> itemStack.setType(Material.GOLD_INGOT);
@@ -441,7 +479,7 @@ public interface Utils {
         return itemStack;
     }
 
-    default boolean isArmor (Material material){
+    default boolean isArmor(Material material) {
         //Check if the material is an armor type, return true if it is, return false if it isnt
         String materialName = material.name();
         // Check if the material name contains "HELMET", "CHESTPLATE", "LEGGINGS", or "BOOTS"
@@ -488,7 +526,8 @@ public interface Utils {
                 return null;
         }
     }
-    default boolean isAnimal(EntityType entityType){
+
+    default boolean isAnimal(EntityType entityType) {
         switch (entityType) {
             case CHICKEN:
             case COW:
@@ -507,6 +546,7 @@ public interface Utils {
                 return false;
         }
     }
+
     default void createWhirlpool(Player player, Location location) {
         final double DAMAGE_PER_TICK = 4.0;
         final double PULL_FORCE = 0.2;
@@ -546,6 +586,7 @@ public interface Utils {
             }
         }.runTaskTimer(SurvivalOverhaul.getInstance(), 0, 1); // Run every tick
     }
+
     default void breakWood(Block block) {
         if (!isLog(block.getType())) {
             return;
@@ -577,6 +618,142 @@ public interface Utils {
         }
     }
 
+    default void setBlockData(Block block, String key) {
+        block.setMetadata(key, new FixedMetadataValue(SurvivalOverhaul.getInstance(), "true"));
+    }
+
+    default boolean isBlockData(Block block, String key) {
+        List<MetadataValue> metadataContent = block.getMetadata(key);
+        if (metadataContent.size() > 0 && metadataContent.get(0).value().equals("true")) {
+            return true;
+        }
+
+        return false;
+    }
+
+    default List<String> generateGradient(String startColor, String endColor, int steps) {
+        List<String> gradientColors = new ArrayList<>();
+
+        int startRed = Integer.parseInt(startColor.substring(1, 3), 16);
+        int startGreen = Integer.parseInt(startColor.substring(3, 5), 16);
+        int startBlue = Integer.parseInt(startColor.substring(5, 7), 16);
+
+        int endRed = Integer.parseInt(endColor.substring(1, 3), 16);
+        int endGreen = Integer.parseInt(endColor.substring(3, 5), 16);
+        int endBlue = Integer.parseInt(endColor.substring(5, 7), 16);
+
+        double redStep = (double) (endRed - startRed) / (steps - 1);
+        double greenStep = (double) (endGreen - startGreen) / (steps - 1);
+        double blueStep = (double) (endBlue - startBlue) / (steps - 1);
+
+        for (int i = 0; i < steps; i++) {
+            int red = (int) (startRed + i * redStep);
+            int green = (int) (startGreen + i * greenStep);
+            int blue = (int) (startBlue + i * blueStep);
+
+            String hexColor = String.format("%02X%02X%02X", red, green, blue);
+            gradientColors.add("§x§" + hexColor);
+        }
+
+        return gradientColors;
+    }
+
+    default String gradString(String str, String startColor, String endColor) {
+        String finalString = "";
+        List<String> colours = generateGradient(startColor, endColor, str.length());
+        String[] chars = str.split("(?!^)");
+        for (int i = 0; i < str.length(); i++) {
+            String finalColor = colours.get(i);
+            StringBuilder colorBuilder = new StringBuilder();
+            for (char c : finalColor.toCharArray()) {
+                colorBuilder.append("§").append(c);
+            }
+            finalString += colorBuilder.toString() + chars[i];
+        }
+        return finalString;
+    }
+
+
+    default void sendGradString(CommandSender sender, String str, String startColor, String endColor) {
+        List<String> colours = generateGradient(startColor, endColor, str.length());
+        String[] chars = str.split("");
+        for (int i = 0; i < str.length(); i++) {
+            ChatColor color = ChatColor.getByChar(colours.get(i));
+            sender.sendMessage(color + chars[i]);
+        }
+    }
+
+    default boolean hasPermission(Player player, String perm) {
+        if (player.getPersistentDataContainer().get(NamespacedKeys.getKey(perm), PersistentDataType.STRING) == null)
+            return false;
+        String detectPerm = player.getPersistentDataContainer().get(NamespacedKeys.getKey(perm), PersistentDataType.STRING);
+        if (detectPerm.equalsIgnoreCase("true")) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    default String scramble(String hi) {
+        List<Character> chars = new ArrayList<>();
+
+        for (char c : hi.toCharArray()) {
+            chars.add(c);
+        }
+        Collections.shuffle(chars);
+
+        StringBuilder result = new StringBuilder();
+        for (char c : chars) {
+            result.append(c);
+        }
+        return result.toString();
+
+
+    }
+
+    default ItemStack getSkull(String url) {
+        ItemStack skull = new ItemStack(Material.LEGACY_SKULL, 1, (short) 3);
+        if (url == null || url.isEmpty()) return skull;
+
+        SkullMeta skullMeta = (SkullMeta) skull.getItemMeta();
+        GameProfile profile = new GameProfile(UUID.randomUUID(), null);
+
+        byte[] encodedData = Base64.getEncoder().encode(String.format("{\"textures\":{\"SKIN\":{\"url\":\"%s\"}}}", url).getBytes());
+        profile.getProperties().put("textures", new Property("textures", new String(encodedData)));
+
+        Field profileField = null;
+        try {
+            profileField = skullMeta.getClass().getDeclaredField("profile");
+        } catch (NoSuchFieldException | SecurityException e) {
+            e.printStackTrace();
+        }
+        profileField.setAccessible(true);
+
+        try {
+            profileField.set(skullMeta, profile);
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        skull.setItemMeta(skullMeta);
+        return skull;
+    }
+
+    default void addOrDrop(Player player, ItemStack item) {
+        boolean x = false;
+        for (int i = 0; i < player.getInventory().getSize() - 5; i++) {
+            if (player.getInventory().getItem(i) == null) {
+                player.getInventory().setItem(i, item);
+                x = true;
+                break;
+            } else {
+                continue;
+            }
+        }
+        if (x == false) {
+            player.getWorld().dropItemNaturally(player.getLocation(), item);
+        }
+    }
 
 
 }

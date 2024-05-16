@@ -4,6 +4,7 @@ package org.laykon.survivaloverhaul.Utility;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.laykon.survivaloverhaul.SurvivalOverhaul;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,8 +13,8 @@ public class DataHandler {
     YamlConfiguration data;
     private final JavaPlugin plugin;
 
-    public DataHandler(JavaPlugin plugin) {
-        this.plugin = plugin;
+    public DataHandler() {
+        this.plugin = SurvivalOverhaul.getInstance();
         loadConfig();
     }
 
@@ -40,12 +41,8 @@ public class DataHandler {
         return data;
     }
 
-    public void addOrCreate(String path, Object... value) {
-        if (value.length != 1) {
-            throw new IllegalArgumentException("Only one value can be provided for addOrCreate method");
-        }
-        Object newValue = value[0];
-        getConfig().set(path, newValue);
+    public void addOrCreate(String path, Object value) {
+        getConfig().set(path, value);
 
         try {
             getConfig().save(new File(plugin.getDataFolder(), "data.yml"));

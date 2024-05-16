@@ -14,9 +14,9 @@ import org.laykon.survivaloverhaul.CustomItems.Gods;
 import org.laykon.survivaloverhaul.CustomItems.OlympianItem;
 import org.laykon.survivaloverhaul.SurvivalOverhaul;
 import org.laykon.survivaloverhaul.Utility.ConfigManager;
+import org.laykon.survivaloverhaul.Utility.Utils;
 import org.laykon.survivaloverhaul.Utility.WeightedRandomItemPicker;
 import org.laykon.survivaloverhaul.Utility.itemBuilder;
-import org.laykon.survivaloverhaul.Utility.Utils;
 
 import java.util.ArrayList;
 
@@ -66,7 +66,6 @@ public class FishingListener implements Listener, Utils {
         fishingTable.addItem(Gods.POSEIDON.getItem(OlympianItem.LEGGINGS), 5);
         fishingTable.addItem(Gods.POSEIDON.getItem(OlympianItem.BOOTS), 5);
         fishingTable.addItem(Gods.POSEIDON.getItem(OlympianItem.ITEM), 5);
-
 
         fishingTable.addItem(itemBuilder.buildItem(Material.DIAMOND_PICKAXE, "§l§3Triton's Pickaxe", "§r§r§bCrafted by the Ocean's Sentinel, \n§r§r§bthis pickaxe resonates with the power of the sea,\n§r§r§bbreaking through stone as effortlessly as the tide.§r", new Enchantment[]{Enchantment.DIG_SPEED, Enchantment.LOOT_BONUS_BLOCKS, Enchantment.MENDING, Enchantment.DURABILITY}, false), cfg.getWeight("diamondPickaxe"));
         fishingTable.addItem(itemBuilder.buildItem(Material.DIAMOND_AXE, "§l§3Poseidon's Axe", "§r§r§bForged from coral and imbued with the fury of ocean storms,\nthis axe cleaves through wood with the force of a crashing wave.§r", new Enchantment[]{Enchantment.DIG_SPEED, Enchantment.DAMAGE_ALL, Enchantment.MENDING, Enchantment.DURABILITY}, false), cfg.getWeight("diamondAxe"));

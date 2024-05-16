@@ -336,6 +336,7 @@ public class AbilityHandler implements Utils, Listener {
             for (ItemStack item : drops) {
                 blockLoc.getWorld().dropItemNaturally(blockLoc, smelt(item));
             }
+            it.setDropItems(false);
         }
         //Hephaestus
 

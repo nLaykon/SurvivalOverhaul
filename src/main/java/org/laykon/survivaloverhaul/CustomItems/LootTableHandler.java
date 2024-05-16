@@ -96,7 +96,7 @@ public class LootTableHandler implements Utils, Listener {
 
         Player player = it.getPlayer();
         Block block = it.getBlock();
-        if (block.getType() == Material.STONE) {
+        if (block.getType() == Material.STONE || block.getType() == Material.DEEPSLATE) {
             if (rng.nextInt(200) == 0) {
                 block.getWorld().dropItemNaturally(block.getLocation(), blockBreakDrops.get(rng.nextInt(blockBreakDrops.size())));
             }
